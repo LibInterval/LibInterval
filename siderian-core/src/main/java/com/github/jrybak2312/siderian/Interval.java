@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * Represents interval between two endpoints or in some case interval with gaps.
+ * Represents interval between two endpoints or in some case interval witch has gap(s).
  *
  * @param <T> - type which implements both Comparable and Temporal. So it supports such types
  *            like {@link LocalDate}, {@link YearMonth}...
