@@ -1,6 +1,6 @@
 package com.github.jrybak2312.siderian;
 
-import com.google.common.collect.BoundType;
+import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -129,57 +130,30 @@ public class Interval<T extends Comparable<?> & Temporal> {
      */
     public Interval<T> difference(Interval<T> interval) {
         logger.debug("Finding difference of " + this + " and " + interval);
+        Interval<T> result = findDifference(interval, RangeConverter.defaultInstance());
+        logger.debug("Result of a difference of " + this + " and " + interval + " is " + result + ".");
+        return result;
+    }
+
+    public Interval<T> difference(Interval<T> interval, TemporalUnit temporalUnit) {
+        logger.debug("Finding difference of " + this + " and " + interval + " with " + temporalUnit + " precision.");
+        DiscreteDomain<T> discreteDomain = new CustomComparableTemporalDiscreteDomain<>(temporalUnit);
+        Interval<T> result = findDifference(interval, new RangeConverter<>(discreteDomain));
+        logger.debug("Result of a difference of " + this + " and " + interval + " is " + result + ".");
+        return result;
+    }
+
+    private Interval<T> findDifference(Interval<T> interval, RangeConverter<T> rangeConverter) {
         ImmutableRangeSet<T> difference = this.rangeSet.difference(interval.rangeSet);
-        ImmutableRangeSet<T> closedRangeSet = difference.asRanges().stream()
-                .filter(range -> {
-                    if (range.hasLowerBound() && range.hasUpperBound()) {
-                        T closedLowerEndpoint = getClosedLowerEndpoint(range);
-                        T closedUpperEndpoint = getClosedUpperEndpoint(range);
-                        return ComparableTemporalDiscreteDomain.instance().distance(closedLowerEndpoint, closedUpperEndpoint) > -1;
-                    } else {
-                        return true;
-                    }
-                })
-                .map(range -> {
-                    Range<T> result;
-                    if (range.hasLowerBound() && range.hasUpperBound()) {
-                        result = Range.closed(getClosedLowerEndpoint(range), getClosedUpperEndpoint(range));
-                    } else if (range.hasLowerBound()) {
-                        result = Range.atLeast(getClosedLowerEndpoint(range));
-                    } else if (range.hasUpperBound()) {
-                        result = Range.atMost(getClosedUpperEndpoint(range));
-                    } else {
-                        result = Range.all();
-                    }
-                    return result;
-                })
+        return new Interval<>(convertToClosed(difference, rangeConverter));
+    }
+
+    private ImmutableRangeSet<T> convertToClosed(ImmutableRangeSet<T> difference, RangeConverter<T> rangeConverter) {
+        return difference.asRanges().stream()
+                .filter(rangeConverter::canBeConvertedToClosed)
+                .map(rangeConverter::convertToClosed)
                 .collect(collectingAndThen(toSet(), ImmutableRangeSet::copyOf));
-
-        return new Interval<>(closedRangeSet);
     }
-
-    private T getClosedUpperEndpoint(Range<T> range) {
-        ComparableTemporalDiscreteDomain<T> domain = ComparableTemporalDiscreteDomain.instance();
-        T upperEnpoint;
-        if (range.upperBoundType().equals(BoundType.OPEN)) {
-            upperEnpoint = domain.previous(range.upperEndpoint());
-        } else {
-            upperEnpoint = range.upperEndpoint();
-        }
-        return upperEnpoint;
-    }
-
-    private T getClosedLowerEndpoint(Range<T> range) {
-        ComparableTemporalDiscreteDomain<T> domain = ComparableTemporalDiscreteDomain.instance();
-        T lowerEnpoint;
-        if (range.lowerBoundType().equals(BoundType.OPEN)) {
-            lowerEnpoint = domain.next(range.lowerEndpoint());
-        } else {
-            lowerEnpoint = range.lowerEndpoint();
-        }
-        return lowerEnpoint;
-    }
-
 
     public Optional<T> getLowerEndpoint() {
         return getRange().hasLowerBound() ? Optional.of(getRange().lowerEndpoint()) : Optional.empty();

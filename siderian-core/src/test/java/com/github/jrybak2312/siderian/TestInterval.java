@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import java.util.Optional;
 import static com.github.jrybak2312.siderian.Interval.between;
 import static com.github.jrybak2312.siderian.Interval.intersection;
 import static com.github.jrybak2312.siderian.Interval.union;
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -190,6 +193,21 @@ public class TestInterval {
         Interval<LocalDate> i3 = between(LocalDate.of(2018, 5, 2), LocalDate.of(2018, 11, 25));
         Interval<LocalDate> result = interval1.difference(union(i2, i3));
         assertEquals("[[2017-01-01..2017-04-11], [2018-05-01..2018-05-01], [2018-11-26..+∞)]", result.toString());
+    }
+
+    @Test
+    public void testDifferenceWithCustomTemporalAmount() {
+        LocalDateTime l1 = LocalDateTime.of(baseDate, LocalTime.of(12, 30));
+        LocalDateTime u1 = LocalDateTime.of(baseDate, LocalTime.of(16, 0));
+        LocalDateTime l2 = LocalDateTime.of(baseDate, LocalTime.of(14, 0));
+        LocalDateTime u2 = LocalDateTime.of(baseDate, LocalTime.of(15, 30));
+
+        Interval<LocalDateTime> i1 = between(l1, u1);
+        Interval<LocalDateTime> i2 = between(l2, u2);
+
+        Interval<LocalDateTime> result = i1.difference(i2, MINUTES);
+
+        assertEquals("[[2020-01-01T12:30..2020-01-01T13:59], [2020-01-01T15:31..2020-01-01T16:00]]", result.toString());
     }
 
     //__________________________________other_______________________________________
