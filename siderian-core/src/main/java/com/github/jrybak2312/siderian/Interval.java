@@ -37,6 +37,10 @@ public class Interval<T extends Comparable<?> & Temporal> {
 
     private final ImmutableRangeSet<T> rangeSet;
 
+    private Interval(ImmutableRangeSet<T> rangeSet) {
+        this.rangeSet = rangeSet;
+    }
+
     /**
      * Creates interval between two inclusive endpoints.
      *
@@ -65,20 +69,20 @@ public class Interval<T extends Comparable<?> & Temporal> {
      * @return intersection of intervals or Optional.empty() if there is no intersection.
      */
     @SafeVarargs
-    public static <T extends Comparable<?> & Temporal> Optional<Interval<T>> intersection(Interval<T> first, Interval<T> second, Interval<T>... intervals) {
+    public static <T extends Comparable<?> & Temporal> Interval<T> intersection(Interval<T> first, Interval<T> second, Interval<T>... intervals) {
         return intersection(Stream.concat(Stream.of(first, second), Arrays.stream(intervals)));
     }
 
-    public static <T extends Comparable<?> & Temporal> Optional<Interval<T>> intersection(Iterable<Interval<T>> intervals) {
+    public static <T extends Comparable<?> & Temporal> Interval<T> intersection(Iterable<Interval<T>> intervals) {
         return intersection(Streams.stream(intervals));
     }
 
-    private static <T extends Comparable<?> & Temporal> Optional<Interval<T>> intersection(Stream<Interval<T>> intervals) {
+    private static <T extends Comparable<?> & Temporal> Interval<T> intersection(Stream<Interval<T>> intervals) {
         ImmutableRangeSet<T> rangeSet = intervals.map(Interval::getRangeSet)
                 .map(ImmutableRangeSet::copyOf)
                 .reduce(ImmutableRangeSet::intersection)
                 .orElseThrow(IllegalArgumentException::new);
-        return rangeSet.isEmpty() ? Optional.empty() : Optional.of(new Interval<>(rangeSet));
+        return new Interval<>(rangeSet);
     }
 
     /**
@@ -117,10 +121,6 @@ public class Interval<T extends Comparable<?> & Temporal> {
 
     public static <T extends Comparable<?> & Temporal> Interval<T> none() {
         return new Interval<>(ImmutableRangeSet.of());
-    }
-
-    private Interval(ImmutableRangeSet<T> rangeSet) {
-        this.rangeSet = rangeSet;
     }
 
     /**
@@ -229,6 +229,15 @@ public class Interval<T extends Comparable<?> & Temporal> {
                 .sum();
     }
 
+
+    public boolean isPresent() {
+        return !rangeSet.isEmpty();
+    }
+
+    public Optional<Interval<T>> notNoneInterval() {
+        return isPresent() ? Optional.of(this) : Optional.empty();
+    }
+
     ImmutableRangeSet<T> getRangeSet() {
         return rangeSet;
     }
@@ -279,5 +288,4 @@ public class Interval<T extends Comparable<?> & Temporal> {
     public int hashCode() {
         return Objects.hash(rangeSet);
     }
-
 }

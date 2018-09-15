@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
 
 import static com.github.jrybak2312.siderian.Interval.between;
 import static com.github.jrybak2312.siderian.Interval.intersection;
@@ -41,14 +40,14 @@ public class TestInterval {
         Interval<LocalDate> intersection = intersection(
                 between(baseDate.plusDays(1), baseDate.plusDays(90)),
                 between(baseDate.plusDays(60), baseDate.plusDays(100)),
-                between(baseDate.plusDays(50), baseDate.plusDays(95))).get();
+                between(baseDate.plusDays(50), baseDate.plusDays(95)));
 
         assertEquals("[[2020-03-01..2020-03-31]]", intersection.toString());
     }
 
     @Test
     public void testGetNoIntersection() {
-        Optional<Interval<LocalDate>> intersection = intersection(
+        Interval<LocalDate> intersection = intersection(
                 between(baseDate.plusDays(1), baseDate.plusDays(20)),
                 between(baseDate.plusDays(30), baseDate.plusDays(50)),
                 between(baseDate.plusDays(40), baseDate.plusDays(60)));
@@ -60,7 +59,7 @@ public class TestInterval {
     public void testIntersectionWithUnboundedInterval() {
         Interval<LocalDate> intersection = intersection(
                 between(baseDate.plusDays(1), baseDate.plusDays(30)),
-                between(baseDate.plusDays(25), null)).get();
+                between(baseDate.plusDays(25), null));
 
         assertEquals("[[2020-01-26..2020-01-31]]", intersection.toString());
     }
@@ -69,7 +68,7 @@ public class TestInterval {
     public void testIntersectionOf2UnboundedIntervals() {
         Interval<? extends Comparable<?>> intersection = intersection(
                 between(null, null),
-                between(null, null)).get();
+                between(null, null));
 
         assertEquals("[(-∞..+∞)]", intersection.toString());
     }
@@ -78,7 +77,7 @@ public class TestInterval {
     public void testOneDayIntersection() {
         Interval<LocalDate> intersection = intersection(
                 between(null, baseDate.plusDays(30)),
-                between(baseDate.plusDays(30), null)).get();
+                between(baseDate.plusDays(30), null));
 
         assertEquals("[[2020-01-31..2020-01-31]]", intersection.toString());
     }
@@ -95,7 +94,7 @@ public class TestInterval {
         LocalDate l3 = baseDate.plusDays(5);
         LocalDate u3 = baseDate.plusDays(25);
 
-        Interval<LocalDate> interval = intersection(union, between(l3, u3)).get();
+        Interval<LocalDate> interval = intersection(union, between(l3, u3));
 
         assertEquals("[[2020-01-06..2020-01-11], [2020-01-21..2020-01-26]]", interval.toString());
     }
@@ -260,4 +259,18 @@ public class TestInterval {
                 LocalDate.of(2019, 1, 3),
                 LocalDate.of(2019, 1, 4));
     }
+
+    @Test
+    public void testEmptyNotNoneInterval() {
+        Interval<LocalDate> noneInterval = Interval.none();
+        assertFalse(noneInterval.notNoneInterval().isPresent());
+    }
+
+    @Test
+    public void testNotEmptyNotNoneInterval() {
+        Interval<LocalDate> i = between(baseDate, baseDate.plusDays(10));
+        Interval<LocalDate> result = i.notNoneInterval().get();
+        assertEquals("[[2020-01-01..2020-01-11]]", result.toString());
+    }
+
 }
