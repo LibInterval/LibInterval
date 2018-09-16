@@ -3,7 +3,9 @@ package com.github.jrybak2312.siderian;
 import com.google.common.collect.DiscreteDomain;
 
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalQueries;
 import java.time.temporal.TemporalUnit;
+import java.util.Optional;
 
 /**
  * @author Igor Rybak
@@ -38,7 +40,7 @@ class DefaultComparableTemporalDiscreteDomain<T extends Comparable<?> & Temporal
     }
 
     private TemporalUnit getUnit(T value) {
-        return TemporalUnitSupport.getPrecision(value)
+        return Optional.ofNullable(value.query(TemporalQueries.precision()))
                 .orElseThrow(() -> new UnsupportedOperationException(getMessage(value.getClass())));
     }
 
