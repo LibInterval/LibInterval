@@ -12,8 +12,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 import static com.github.jrybak2312.siderian.Interval.between;
-import static com.github.jrybak2312.siderian.Interval.intersection;
-import static com.github.jrybak2312.siderian.Interval.union;
+import static com.github.jrybak2312.siderian.Interval.unionOf;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +24,7 @@ import static org.junit.Assert.assertFalse;
  * @since 21-Mar-2018
  */
 @RunWith(JUnit4.class)
-public class TestInterval {
+public class TestIntervalImpl {
     private LocalDate baseDate;
 
     @Before
@@ -37,7 +36,7 @@ public class TestInterval {
 
     @Test
     public void testGetIntersectionOf3Intervals() {
-        Interval<LocalDate> intersection = intersection(
+        Interval<LocalDate> intersection = Interval.intersectionOf(
                 between(baseDate.plusDays(1), baseDate.plusDays(90)),
                 between(baseDate.plusDays(60), baseDate.plusDays(100)),
                 between(baseDate.plusDays(50), baseDate.plusDays(95)));
@@ -47,7 +46,7 @@ public class TestInterval {
 
     @Test
     public void testGetNoIntersection() {
-        Interval<LocalDate> intersection = intersection(
+        Interval<LocalDate> intersection = Interval.intersectionOf(
                 between(baseDate.plusDays(1), baseDate.plusDays(20)),
                 between(baseDate.plusDays(30), baseDate.plusDays(50)),
                 between(baseDate.plusDays(40), baseDate.plusDays(60)));
@@ -57,7 +56,7 @@ public class TestInterval {
 
     @Test
     public void testIntersectionWithUnboundedInterval() {
-        Interval<LocalDate> intersection = intersection(
+        Interval<LocalDate> intersection = Interval.intersectionOf(
                 between(baseDate.plusDays(1), baseDate.plusDays(30)),
                 between(baseDate.plusDays(25), null));
 
@@ -66,7 +65,7 @@ public class TestInterval {
 
     @Test
     public void testIntersectionOf2UnboundedIntervals() {
-        Interval<? extends Comparable<?>> intersection = intersection(
+        Interval<? extends Comparable<?>> intersection = Interval.intersectionOf(
                 between(null, null),
                 between(null, null));
 
@@ -75,7 +74,7 @@ public class TestInterval {
 
     @Test
     public void testOneDayIntersection() {
-        Interval<LocalDate> intersection = intersection(
+        Interval<LocalDate> intersection = Interval.intersectionOf(
                 between(null, baseDate.plusDays(30)),
                 between(baseDate.plusDays(30), null));
 
@@ -89,12 +88,12 @@ public class TestInterval {
 
         LocalDate l2 = baseDate.plusDays(20);
         LocalDate u2 = baseDate.plusDays(30);
-        Interval<LocalDate> union = union(between(l1, u1), between(l2, u2));
+        Interval<LocalDate> union = unionOf(between(l1, u1), between(l2, u2));
 
         LocalDate l3 = baseDate.plusDays(5);
         LocalDate u3 = baseDate.plusDays(25);
 
-        Interval<LocalDate> interval = intersection(union, between(l3, u3));
+        Interval<LocalDate> interval = Interval.intersectionOf(union, between(l3, u3));
 
         assertEquals("[[2020-01-06..2020-01-11], [2020-01-21..2020-01-26]]", interval.toString());
     }
@@ -108,7 +107,7 @@ public class TestInterval {
 
         LocalDate l2 = l1.plusDays(20);
         LocalDate u2 = l1.plusDays(30);
-        Interval<LocalDate> result = union(between(l1, u1), between(l2, u2));
+        Interval<LocalDate> result = unionOf(between(l1, u1), between(l2, u2));
 
         assertEquals("[[2020-01-01..2020-01-11], [2020-01-21..2020-01-31]]", result.toString());
     }
@@ -120,7 +119,7 @@ public class TestInterval {
 
         LocalDate l2 = baseDate.plusDays(20);
         LocalDate u2 = baseDate.plusDays(30);
-        Interval<LocalDate> result = union(between(l1, u1), between(l2, u2));
+        Interval<LocalDate> result = unionOf(between(l1, u1), between(l2, u2));
         result.hasLowerBound();
     }
 
@@ -131,7 +130,7 @@ public class TestInterval {
 
         LocalDate l2 = baseDate.plusDays(8);
         LocalDate u2 = baseDate.plusDays(30);
-        Interval<LocalDate> result = union(between(l1, u1), between(l2, u2));
+        Interval<LocalDate> result = unionOf(between(l1, u1), between(l2, u2));
         assertEquals("[[2020-01-01..2020-01-31]]", result.toString());
     }
 
@@ -151,7 +150,7 @@ public class TestInterval {
         LocalDate u3 = LocalDate.of(2018, 5, 8);
         Interval<LocalDate> i3 = between(l3, u3);
 
-        Interval<LocalDate> result = i1.difference(union(i2, i3));
+        Interval<LocalDate> result = i1.difference(unionOf(i2, i3));
 
         assertEquals("[[2018-05-01..2018-05-01], [2018-05-05..2018-05-05], [2018-05-09..2018-05-10]]",
                 result.toString());
@@ -181,7 +180,7 @@ public class TestInterval {
         Interval<LocalDate> i1 = between(LocalDate.of(2017, 1, 1), null);
         Interval<LocalDate> i2 = between(LocalDate.of(2017, 4, 12), LocalDate.of(2018, 4, 30));
         Interval<LocalDate> i3 = between(LocalDate.of(2018, 5, 1), LocalDate.of(2018, 11, 25));
-        Interval<LocalDate> result = i1.difference(union(i2, i3));
+        Interval<LocalDate> result = i1.difference(unionOf(i2, i3));
         assertEquals("[[2017-01-01..2017-04-11], [2018-11-26..+∞)]", result.toString());
     }
 
@@ -190,7 +189,7 @@ public class TestInterval {
         Interval<LocalDate> interval1 = between(LocalDate.of(2017, 1, 1), null);
         Interval<LocalDate> i2 = between(LocalDate.of(2017, 4, 12), LocalDate.of(2018, 4, 30));
         Interval<LocalDate> i3 = between(LocalDate.of(2018, 5, 2), LocalDate.of(2018, 11, 25));
-        Interval<LocalDate> result = interval1.difference(union(i2, i3));
+        Interval<LocalDate> result = interval1.difference(unionOf(i2, i3));
         assertEquals("[[2017-01-01..2017-04-11], [2018-05-01..2018-05-01], [2018-11-26..+∞)]", result.toString());
     }
 
@@ -225,9 +224,9 @@ public class TestInterval {
         LocalDate u3 = LocalDate.of(2018, 3, 31);
         Interval<LocalDate> i3 = between(l3, u3);
 
-        List<YearMonth> months = union(union(i1, i2), i3).months().collect(toList());
+        List<YearMonth> result = unionOf(unionOf(i1, i2), i3).months().collect(toList());
 
-        assertThat(months).containsExactly(
+        assertThat(result).containsExactly(
                 YearMonth.of(2017, 12),
                 YearMonth.of(2018, 1),
                 YearMonth.of(2018, 3));
@@ -248,9 +247,9 @@ public class TestInterval {
         LocalDate u3 = LocalDate.of(2019, 1, 4);
         Interval<LocalDate> i3 = between(l3, u3);
 
-        List<LocalDate> days = union(union(i1, i2), i3).days().collect(toList());
+        List<LocalDate> result = unionOf(unionOf(i1, i2), i3).days().collect(toList());
 
-        assertThat(days).containsExactly(
+        assertThat(result).containsExactly(
                 LocalDate.of(2018, 12, 28),
                 LocalDate.of(2018, 12, 29),
                 LocalDate.of(2018, 12, 30),
@@ -273,4 +272,55 @@ public class TestInterval {
         assertEquals("[[2020-01-01..2020-01-11]]", result.toString());
     }
 
+    @Test
+    public void testAllInterval() {
+        assertEquals("[(-∞..+∞)]", Interval.all().toString());
+    }
+
+    @Test
+    public void testNoneInterval() {
+        assertEquals("[]", Interval.none().toString());
+    }
+
+    @Test
+    public void testToMonthsInterval() {
+        LocalDate l1 = LocalDate.of(2017, 12, 1);
+        LocalDate u1 = LocalDate.of(2017, 12, 10);
+        Interval<LocalDate> i1 = between(l1, u1);
+
+        LocalDate l2 = LocalDate.of(2018, 1, 20);
+        LocalDate u2 = LocalDate.of(2018, 5, 14);
+        Interval<LocalDate> i2 = between(l2, u2);
+
+        LocalDate l3 = LocalDate.of(2018, 11, 5);
+        LocalDate u3 = LocalDate.of(2019, 3, 10);
+        Interval<LocalDate> i3 = between(l3, u3);
+
+        Interval<YearMonth> result = unionOf(unionOf(i1, i2), i3).toMonthsInterval();
+
+        assertEquals("[[2017-12..2017-12], [2018-01..2018-05], [2018-11..2019-03]]", result.toString());
+    }
+
+    @Test
+    public void testCountDays() {
+        LocalDate l1 = LocalDate.of(2019, 12, 31);
+        LocalDate u1 = LocalDate.of(2020, 4, 30);
+        Interval<LocalDate> i1 = between(l1, u1);
+
+        LocalDate l2 = LocalDate.of(2020, 6, 2);
+        LocalDate u2 = LocalDate.of(2020, 12, 31);
+        Interval<LocalDate> i2 = between(l2, u2);
+
+        long days = unionOf(i1, i2).countDays();
+        assertEquals(335L, days);
+    }
+
+    @Test
+    public void testToDaysInterval() {
+        YearMonth l = YearMonth.of(2020, 1);
+        YearMonth u = YearMonth.of(2020, 2);
+        Interval<YearMonth> monthsInterval = Interval.between(l, u);
+        Interval<LocalDate> daysInterval = monthsInterval.toDaysInterval();
+        assertEquals("[[2020-01-01..2020-02-29]]", daysInterval.toString());
+    }
 }

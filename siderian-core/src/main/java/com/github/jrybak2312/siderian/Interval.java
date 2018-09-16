@@ -1,19 +1,14 @@
 package com.github.jrybak2312.siderian;
 
-import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
 import com.google.common.collect.Streams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -21,8 +16,6 @@ import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MONTHS;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Represents interval between two endpoints or in some case interval witch has gap(s).
@@ -30,16 +23,9 @@ import static java.util.stream.Collectors.toSet;
  * @param <T> - type which implements both Comparable and Temporal. So it supports such types
  *            like {@link LocalDate}, {@link YearMonth}...
  * @author Igor Rybak
- * @since 15.11.2017
+ * @since 15-Sep-2018
  */
-public class Interval<T extends Comparable<?> & Temporal> {
-    private static Logger logger = LoggerFactory.getLogger(Interval.class);
-
-    private final ImmutableRangeSet<T> rangeSet;
-
-    private Interval(ImmutableRangeSet<T> rangeSet) {
-        this.rangeSet = rangeSet;
-    }
+public interface Interval<T extends Comparable<?> & Temporal> {
 
     /**
      * Creates interval between two inclusive endpoints.
@@ -47,7 +33,7 @@ public class Interval<T extends Comparable<?> & Temporal> {
      * @param lowerInclusiveEndpoint - lower inclusive endpoint. If null - no lower bound;
      * @param upperInclusiveEndpoint - upper inclusive endpoint. If null - no upper bound;
      */
-    public static <T extends Comparable<?> & Temporal> Interval<T> between(T lowerInclusiveEndpoint, T upperInclusiveEndpoint) {
+    static <T extends Comparable<?> & Temporal> Interval<T> between(T lowerInclusiveEndpoint, T upperInclusiveEndpoint) {
         Range<T> range;
         if (lowerInclusiveEndpoint != null && upperInclusiveEndpoint != null) {
             range = Range.closed(lowerInclusiveEndpoint, upperInclusiveEndpoint);
@@ -59,7 +45,7 @@ public class Interval<T extends Comparable<?> & Temporal> {
             range = Range.all();
         }
 
-        return new Interval<>(ImmutableRangeSet.of(range));
+        return new IntervalImpl<>(ImmutableRangeSet.of(range));
     }
 
     /**
@@ -69,20 +55,12 @@ public class Interval<T extends Comparable<?> & Temporal> {
      * @return intersection of intervals or Optional.empty() if there is no intersection.
      */
     @SafeVarargs
-    public static <T extends Comparable<?> & Temporal> Interval<T> intersection(Interval<T> first, Interval<T> second, Interval<T>... intervals) {
-        return intersection(Stream.concat(Stream.of(first, second), Arrays.stream(intervals)));
+    static <T extends Comparable<?> & Temporal> Interval<T> intersectionOf(Interval<T> first, Interval<T> second, Interval<T>... intervals) {
+        return IntervalUtils.intersection(Stream.concat(Stream.of(first, second), Arrays.stream(intervals)));
     }
 
-    public static <T extends Comparable<?> & Temporal> Interval<T> intersection(Iterable<Interval<T>> intervals) {
-        return intersection(Streams.stream(intervals));
-    }
-
-    private static <T extends Comparable<?> & Temporal> Interval<T> intersection(Stream<Interval<T>> intervals) {
-        ImmutableRangeSet<T> rangeSet = intervals.map(Interval::getRangeSet)
-                .map(ImmutableRangeSet::copyOf)
-                .reduce(ImmutableRangeSet::intersection)
-                .orElseThrow(IllegalArgumentException::new);
-        return new Interval<>(rangeSet);
+    static <T extends Comparable<?> & Temporal> Interval<T> intersectionOf(Iterable<Interval<T>> intervals) {
+        return IntervalUtils.intersection(Streams.stream(intervals));
     }
 
     /**
@@ -94,33 +72,31 @@ public class Interval<T extends Comparable<?> & Temporal> {
      * @param intervals - intervals to create union;
      */
     @SafeVarargs
-    public static <T extends Comparable<?> & Temporal> Interval<T> union(Interval<T> first, Interval<T> second, Interval<T>... intervals) {
-        return union(Stream.concat(Stream.of(first, second), Arrays.stream(intervals)));
+    static <T extends Comparable<?> & Temporal> Interval<T> unionOf(Interval<T> first, Interval<T> second, Interval<T>... intervals) {
+        return IntervalUtils.union(Stream.concat(Stream.of(first, second), Arrays.stream(intervals)));
     }
 
-    public static <T extends Comparable<?> & Temporal> Interval<T> union(Iterable<Interval<T>> intervals) {
-        return union(Streams.stream(intervals));
+    static <T extends Comparable<?> & Temporal> Interval<T> unionOf(Iterable<Interval<T>> intervals) {
+        return IntervalUtils.union(Streams.stream(intervals));
     }
 
-    public static <T extends Comparable<?> & Temporal, V> Interval<T> union(Function<V, Interval<T>> getIntervalFunction, Iterable<V> intervals) {
-        return union(Streams.stream(intervals).map(getIntervalFunction));
+    static <T extends Comparable<?> & Temporal, V> Interval<T> unionOf(Function<V, Interval<T>> getIntervalFunction, Iterable<V> intervals) {
+        return IntervalUtils.union(Streams.stream(intervals).map(getIntervalFunction));
     }
 
-    private static <T extends Comparable<?> & Temporal> Interval<T> union(Stream<Interval<T>> intervals) {
-        ImmutableRangeSet<T> rangeSet = intervals.flatMap(i -> i.getRangeSet().asRanges().stream())
-                .collect(collectingAndThen(toSet(), ImmutableRangeSet::unionOf));
-
-        return new Interval<>(rangeSet);
-    }
-
-    public static Interval<LocalDate> fromMonth(YearMonth month) {
+    static Interval<LocalDate> daysIntervalFromMonth(YearMonth month) {
         LocalDate startDate = month.atDay(1);
         LocalDate endDate = month.atEndOfMonth();
         return Interval.between(startDate, endDate);
     }
 
-    public static <T extends Comparable<?> & Temporal> Interval<T> none() {
-        return new Interval<>(ImmutableRangeSet.of());
+    static <T extends Comparable<?> & Temporal> Interval<T> all() {
+        ImmutableRangeSet<T> all = ImmutableRangeSet.of(Range.all());
+        return new IntervalImpl<>(all);
+    }
+
+    static <T extends Comparable<?> & Temporal> Interval<T> none() {
+        return new IntervalImpl<>(ImmutableRangeSet.of());
     }
 
     /**
@@ -128,164 +104,63 @@ public class Interval<T extends Comparable<?> & Temporal> {
      * e.g the result of difference [[2018-05-01..2018-05-10]] and [[2018-05-03..2018-05-06]]
      * is [[2018-05-01..2018-05-02], [2018-05-07..2018-05-10]]
      */
-    public Interval<T> difference(Interval<T> interval) {
-        logger.debug("Finding difference of " + this + " and " + interval);
-        Interval<T> result = findDifference(interval, RangeConverter.defaultInstance());
-        logger.debug("Result of a difference of " + this + " and " + interval + " is " + result + ".");
-        return result;
+    Interval<T> difference(Interval<T> interval);
+
+    Interval<T> difference(Interval<T> interval, TemporalUnit temporalUnit);
+
+    Optional<T> lowerEndpoint();
+
+    Optional<T> upperEndpoint();
+
+    boolean contains(T t);
+
+    boolean hasLowerBound();
+
+    boolean hasUpperBound();
+
+    Set<Interval<T>> subIntervals();
+
+    default Interval<YearMonth> toMonthsInterval() {
+        return map(YearMonth::from);
     }
 
-    public Interval<T> difference(Interval<T> interval, TemporalUnit temporalUnit) {
-        logger.debug("Finding difference of " + this + " and " + interval + " with " + temporalUnit + " precision.");
-        DiscreteDomain<T> discreteDomain = new CustomComparableTemporalDiscreteDomain<>(temporalUnit);
-        Interval<T> result = findDifference(interval, new RangeConverter<>(discreteDomain));
-        logger.debug("Result of a difference of " + this + " and " + interval + " is " + result + ".");
-        return result;
+    default Interval<LocalDate> toDaysInterval() {
+        throw new UnsupportedOperationException();
     }
 
-    private Interval<T> findDifference(Interval<T> interval, RangeConverter<T> rangeConverter) {
-        ImmutableRangeSet<T> difference = this.rangeSet.difference(interval.rangeSet);
-        return new Interval<>(convertToClosed(difference, rangeConverter));
+    default <R extends Comparable<?> & Temporal> Interval<R> map(Function<T, R> mapper) {
+        return map(mapper, mapper);
     }
 
-    private ImmutableRangeSet<T> convertToClosed(ImmutableRangeSet<T> difference, RangeConverter<T> rangeConverter) {
-        return difference.asRanges().stream()
-                .filter(rangeConverter::canBeConvertedToClosed)
-                .map(rangeConverter::convertToClosed)
-                .collect(collectingAndThen(toSet(), ImmutableRangeSet::copyOf));
+    <R extends Comparable<?> & Temporal> Interval<R> map(Function<T, R> lowerEndpointMapper,
+                                                         Function<T, R> upperEndpointMapper);
+
+    default Stream<YearMonth> months() {
+        return iterate(MONTHS, YearMonth::from);
     }
 
-    public Optional<T> getLowerEndpoint() {
-        return getRange().hasLowerBound() ? Optional.of(getRange().lowerEndpoint()) : Optional.empty();
+    default Stream<LocalDate> days() {
+        return iterate(DAYS, LocalDate::from);
     }
 
-    public Optional<T> getUpperEndpoint() {
-        return getRange().hasUpperBound() ? Optional.of(getRange().upperEndpoint()) : Optional.empty();
+    default <R extends Comparable<?> & Temporal> Stream<R> iterate(TemporalUnit temporalUnit,
+                                                                   Function<T, R> mapper) {
+        return iterate(temporalUnit, mapper, mapper);
     }
 
-    public boolean contains(T t) {
-        return rangeSet.contains(t);
+    <R extends Comparable<?> & Temporal> Stream<R> iterate(TemporalUnit temporalUnit,
+                                                           Function<T, R> lowerEndpointMapper,
+                                                           Function<T, R> upperEndpointMapper);
+
+    default long countDays() {
+        return count(DAYS);
     }
 
-    public boolean hasLowerBound() {
-        return getRange().hasLowerBound();
-    }
+    long count(TemporalUnit temporalUnit);
 
-    public boolean hasUpperBound() {
-        return getRange().hasUpperBound();
-    }
+    boolean isPresent();
 
-    public Set<Interval<T>> getSubIntervals() {
-        return rangeSet.asRanges().stream()
-                .map(ImmutableRangeSet::of)
-                .map((Function<ImmutableRangeSet<T>, Interval<T>>) Interval::new)
-                .collect(toSet());
-    }
+    Optional<Interval<T>> notNoneInterval();
 
-    public Interval<YearMonth> toMonthInterval() {
-        ImmutableRangeSet<YearMonth> rangeSet = getSubIntervals().stream()
-                .map(i -> {
-                    YearMonth start = i.getLowerEndpoint().map(YearMonth::from).orElse(null);
-                    YearMonth end = i.getUpperEndpoint().map(YearMonth::from).orElse(null);
-                    return Interval.between(start, end);
-                })
-                .map(Interval::getRangeSet)
-                .map(RangeSet::asRanges)
-                .flatMap(Set::stream)
-                .collect(collectingAndThen(toSet(), ImmutableRangeSet::unionOf));
-
-        return new Interval<>(rangeSet);
-    }
-
-    public Stream<YearMonth> months() {
-        return getSubIntervals().stream()
-                .flatMap(subInterval -> {
-                    YearMonth start = subInterval.getConvertedLowerEndpoint(YearMonth::from);
-                    YearMonth end = subInterval.getConvertedUpperEndpoint(YearMonth::from);
-
-                    return Stream.iterate(start, date -> date.plusMonths(1))
-                            .limit(MONTHS.between(start, end) + 1);
-                })
-                .distinct()
-                .sorted();
-    }
-
-    public Stream<LocalDate> days() {
-        return getSubIntervals().stream()
-                .flatMap(subInterval -> {
-                    LocalDate start = subInterval.getConvertedLowerEndpoint(LocalDate::from);
-                    LocalDate end = subInterval.getConvertedUpperEndpoint(LocalDate::from);
-
-                    return Stream.iterate(start, date -> date.plusDays(1))
-                            .limit(DAYS.between(start, end) + 1);
-                })
-                .distinct()
-                .sorted();
-    }
-
-    public long getDaysCount() {
-        return rangeSet.asRanges().stream()
-                .mapToLong(range -> DAYS.between(range.lowerEndpoint(), range.upperEndpoint()) + 1)
-                .sum();
-    }
-
-
-    public boolean isPresent() {
-        return !rangeSet.isEmpty();
-    }
-
-    public Optional<Interval<T>> notNoneInterval() {
-        return isPresent() ? Optional.of(this) : Optional.empty();
-    }
-
-    ImmutableRangeSet<T> getRangeSet() {
-        return rangeSet;
-    }
-
-    private Range<T> getRange() {
-        Set<Range<T>> ranges = rangeSet.asRanges();
-        if (ranges.size() > 1) {
-            throw new IllegalStateException("The interval has more than one sub intervals: " + this + ".");
-        }
-
-        return ranges.stream().findFirst().orElseThrow(() -> new IllegalStateException("The interval is empty."));
-    }
-
-    private <R> R getConvertedLowerEndpoint(Function<T, R> converter) {
-        return this.getLowerEndpoint()
-                .map(converter)
-                .orElseThrow(this::newInvalidLowerBoundException);
-    }
-
-    private <R> R getConvertedUpperEndpoint(Function<T, R> converter) {
-        return this.getUpperEndpoint()
-                .map(converter)
-                .orElseThrow(this::newInvalidUpperBoundException);
-    }
-
-    private IllegalStateException newInvalidLowerBoundException() {
-        return new IllegalStateException("The interval " + this + " doesn't have lower bound.");
-    }
-
-    private IllegalStateException newInvalidUpperBoundException() {
-        return new IllegalStateException("The interval " + this + " doesn't have upper bound.");
-    }
-
-    @Override
-    public String toString() {
-        return rangeSet.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Interval<?> interval = (Interval<?>) o;
-        return Objects.equals(rangeSet, interval.rangeSet);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(rangeSet);
-    }
+    ImmutableRangeSet<T> rangeSet();
 }

@@ -8,8 +8,8 @@ import java.time.temporal.Temporal;
 import static com.google.common.collect.BoundType.OPEN;
 
 /**
- *  @author Igor Rybak
- *  @since 11-Sep-2018
+ * @author Igor Rybak
+ * @since 11-Sep-2018
  */
 class RangeConverter<T extends Comparable<?> & Temporal> {
     private final static RangeConverter<?> INSTANCE = new RangeConverter<>(DefaultComparableTemporalDiscreteDomain.instance());
