@@ -8,6 +8,7 @@ import org.junit.runners.JUnit4;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Year;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -208,6 +209,91 @@ public class TestIntervalImpl {
         assertEquals("[[2020-01-01T12:30..2020-01-01T13:59], [2020-01-01T15:31..2020-01-01T16:00]]", result.toString());
     }
 
+    //___________________________________map________________________________________
+
+    @Test
+    public void testDaysToTimeInterval() {
+        LocalDate l1 = LocalDate.of(2020, 4, 10);
+        LocalDate u1 = LocalDate.of(2021, 10, 18);
+        Interval<LocalDateTime> result = between(l1, u1).toTimeInterval();
+
+        assertEquals("[[2020-04-10T00:00..2021-10-18T23:59:59.999999999]]",result.toString());
+    }
+
+    @Test
+    public void testDaysToMonthsInterval() {
+        LocalDate l1 = LocalDate.of(2017, 12, 1);
+        LocalDate u1 = LocalDate.of(2017, 12, 10);
+        Interval<LocalDate> i1 = between(l1, u1);
+
+        LocalDate l2 = LocalDate.of(2018, 1, 20);
+        LocalDate u2 = LocalDate.of(2018, 5, 14);
+        Interval<LocalDate> i2 = between(l2, u2);
+
+        LocalDate l3 = LocalDate.of(2018, 11, 5);
+        LocalDate u3 = LocalDate.of(2019, 3, 10);
+        Interval<LocalDate> i3 = between(l3, u3);
+
+        // .map(YearMonth::from) is better in this case
+        Interval<YearMonth> result = unionOf(unionOf(i1, i2), i3).toMonthsInterval();
+
+        assertEquals("[[2017-12..2017-12], [2018-01..2018-05], [2018-11..2019-03]]", result.toString());
+    }
+
+    @Test
+    public void testMonthToTimeInterval() {
+        YearMonth l = YearMonth.of(2022, 3);
+        YearMonth u = YearMonth.of(2026, 9);
+        Interval<YearMonth> monthsInterval = Interval.between(l, u);
+        Interval<LocalDateTime> result = monthsInterval.toTimeInterval();
+        assertEquals("[[2022-03-01T00:00..2026-09-30T23:59:59.999999999]]", result.toString());
+    }
+
+    @Test
+    public void testMonthToDaysInterval() {
+        YearMonth l = YearMonth.of(2020, 1);
+        YearMonth u = YearMonth.of(2020, 2);
+        Interval<YearMonth> monthsInterval = Interval.between(l, u);
+        Interval<LocalDate> result = monthsInterval.toDaysInterval();
+        assertEquals("[[2020-01-01..2020-02-29]]", result.toString());
+    }
+
+    @Test
+    public void testMonthToYearsInterval() {
+        YearMonth l = YearMonth.of(2020, 12);
+        YearMonth u = YearMonth.of(2025, 5);
+        Interval<YearMonth> monthsInterval = Interval.between(l, u);
+        Interval<Year> result = monthsInterval.map(Year::from);
+        assertEquals("[[2020..2025]]", result.toString());
+    }
+
+    @Test
+    public void testYearsToTimeInterval() {
+        Year l1 = Year.of(2020);
+        Year u1 = Year.of(2024);
+
+        Interval<LocalDateTime> result = between(l1, u1).toTimeInterval();
+        assertEquals("[[2020-01-01T00:00..2024-12-31T23:59:59.999999999]]", result.toString());
+    }
+
+    @Test
+    public void testYearsToDaysInterval() {
+        Year l1 = Year.of(2019);
+        Year u1 = Year.of(2021);
+
+        Interval<LocalDate> result = between(l1, u1).toDaysInterval();
+        assertEquals("[[2019-01-01..2021-12-31]]", result.toString());
+    }
+
+    @Test
+    public void testYearsToMonthsInterval() {
+        Year l1 = Year.of(2018);
+        Year u1 = Year.of(2020);
+
+        Interval<YearMonth> result = between(l1, u1).toMonthsInterval();
+        assertEquals("[[2018-01..2020-12]]", result.toString());
+    }
+
     //__________________________________other_______________________________________
 
     @Test
@@ -283,25 +369,6 @@ public class TestIntervalImpl {
     }
 
     @Test
-    public void testToMonthsInterval() {
-        LocalDate l1 = LocalDate.of(2017, 12, 1);
-        LocalDate u1 = LocalDate.of(2017, 12, 10);
-        Interval<LocalDate> i1 = between(l1, u1);
-
-        LocalDate l2 = LocalDate.of(2018, 1, 20);
-        LocalDate u2 = LocalDate.of(2018, 5, 14);
-        Interval<LocalDate> i2 = between(l2, u2);
-
-        LocalDate l3 = LocalDate.of(2018, 11, 5);
-        LocalDate u3 = LocalDate.of(2019, 3, 10);
-        Interval<LocalDate> i3 = between(l3, u3);
-
-        Interval<YearMonth> result = unionOf(unionOf(i1, i2), i3).toMonthsInterval();
-
-        assertEquals("[[2017-12..2017-12], [2018-01..2018-05], [2018-11..2019-03]]", result.toString());
-    }
-
-    @Test
     public void testCountDays() {
         LocalDate l1 = LocalDate.of(2019, 12, 31);
         LocalDate u1 = LocalDate.of(2020, 4, 30);
@@ -315,12 +382,4 @@ public class TestIntervalImpl {
         assertEquals(335L, days);
     }
 
-    @Test
-    public void testToDaysInterval() {
-        YearMonth l = YearMonth.of(2020, 1);
-        YearMonth u = YearMonth.of(2020, 2);
-        Interval<YearMonth> monthsInterval = Interval.between(l, u);
-        Interval<LocalDate> daysInterval = monthsInterval.toDaysInterval();
-        assertEquals("[[2020-01-01..2020-02-29]]", daysInterval.toString());
-    }
 }

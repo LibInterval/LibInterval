@@ -5,6 +5,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Streams;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
@@ -14,6 +15,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.github.jrybak2312.siderian.TemporalConverters.convertLowerEndpoint;
+import static com.github.jrybak2312.siderian.TemporalConverters.convertUpperEndpoint;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MONTHS;
 
@@ -121,11 +124,15 @@ public interface Interval<T extends Comparable<?> & Temporal> {
     Set<Interval<T>> subIntervals();
 
     default Interval<YearMonth> toMonthsInterval() {
-        return map(YearMonth::from);
+        return map(t -> convertLowerEndpoint(t, YearMonth.class), t -> convertUpperEndpoint(t, YearMonth.class));
     }
 
     default Interval<LocalDate> toDaysInterval() {
-        throw new UnsupportedOperationException();
+        return map(t -> convertLowerEndpoint(t, LocalDate.class), t -> convertUpperEndpoint(t, LocalDate.class));
+    }
+
+    default Interval<LocalDateTime> toTimeInterval() {
+        return map(t -> convertLowerEndpoint(t, LocalDateTime.class), t -> convertUpperEndpoint(t, LocalDateTime.class));
     }
 
     default <R extends Comparable<?> & Temporal> Interval<R> map(Function<T, R> mapper) {
