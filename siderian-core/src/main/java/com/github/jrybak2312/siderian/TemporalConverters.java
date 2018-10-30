@@ -20,8 +20,7 @@ import java.util.Optional;
  */
 class TemporalConverters {
 
-
-    private final static Map<Class<?>, TemporalConverter> converters = ImmutableMap.<Class<?>, TemporalConverter>builder()
+    private final static Map<Class<?>, TemporalConverter<?>> converters = ImmutableMap.<Class<?>, TemporalConverter<?>>builder()
             .put(YearMonth.class, new YearMonthTemporalConverter())
             .put(LocalDate.class, new LocalDateTemporalConverter())
             .put(LocalDateTime.class, new LocalDateTimeTemporalConverter())

@@ -33,6 +33,38 @@ public class TestIntervalImpl {
         baseDate = LocalDate.of(2020, 1, 1);
     }
 
+    //_________________________________factory methods_____________________________________________
+
+    @Test
+    public void testFrom() {
+        assertEquals("[[2020-01-01..+∞)]", Interval.from(baseDate).toString());
+    }
+
+    @Test
+    public void testTo() {
+        assertEquals("[(-∞..2020-01-01]]", Interval.to(baseDate).toString());
+    }
+
+    @Test
+    public void testBetween() {
+        assertEquals("[[2020-01-01..2020-01-11]]", Interval.between(baseDate, baseDate.plusDays(10)).toString());
+    }
+
+    @Test
+    public void testAtLeast() {
+        assertEquals("[[2020-01-01..+∞)]", Interval.atLeast(baseDate).toString());
+    }
+
+    @Test
+    public void testAtMost() {
+        assertEquals("[[2020-01-01..+∞)]", Interval.atMost(baseDate).toString());
+    }
+
+    @Test
+    public void testClosed() {
+        assertEquals("[[2020-01-01..2020-01-21]]", Interval.closed(baseDate, baseDate.plusDays(20)).toString());
+    }
+
     //__________________________________intersection________________________________________________
 
     @Test
@@ -217,7 +249,7 @@ public class TestIntervalImpl {
         LocalDate u1 = LocalDate.of(2021, 10, 18);
         Interval<LocalDateTime> result = between(l1, u1).toTimeInterval();
 
-        assertEquals("[[2020-04-10T00:00..2021-10-18T23:59:59.999999999]]",result.toString());
+        assertEquals("[[2020-04-10T00:00..2021-10-18T23:59:59.999999999]]", result.toString());
     }
 
     @Test

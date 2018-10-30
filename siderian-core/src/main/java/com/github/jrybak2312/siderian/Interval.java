@@ -21,7 +21,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MONTHS;
 
 /**
- * Represents interval between two endpoints or in some case interval witch has gap(s).
+ * Represents interval between two inclusive endpoints or in some cases interval witch has gap(s).
  *
  * @param <T> - type which implements both Comparable and Temporal. So it supports such types
  *            like {@link LocalDate}, {@link YearMonth}...
@@ -31,24 +31,64 @@ import static java.time.temporal.ChronoUnit.MONTHS;
 public interface Interval<T extends Comparable<?> & Temporal> {
 
     /**
-     * Creates interval between two inclusive endpoints.
-     *
-     * @param lowerInclusiveEndpoint - lower inclusive endpoint. If null - no lower bound;
-     * @param upperInclusiveEndpoint - upper inclusive endpoint. If null - no upper bound;
+     * @param lowerEndpoint - nullable lower endpoint. If null than -∞.
+     * @return [[lowerEndpoint..+∞)].
      */
-    static <T extends Comparable<?> & Temporal> Interval<T> between(T lowerInclusiveEndpoint, T upperInclusiveEndpoint) {
+    static <T extends Comparable<?> & Temporal> Interval<T> from(T lowerEndpoint) {
+        return between(lowerEndpoint, null);
+    }
+
+    /**
+     * @param upperEndpoint - nullable upper endpoint. If null than +∞.
+     * @return [(-∞..upperEndpoint]].
+     */
+    static <T extends Comparable<?> & Temporal> Interval<T> to(T upperEndpoint) {
+        return between(null, upperEndpoint);
+    }
+
+    /**
+     * @param lowerEndpoint - nullable lower endpoint. If null than -∞.
+     * @param upperEndpoint - nullable upper endpoint. If null than +∞.
+     * @return [[lowerEndpoint..upperEndpoint]]
+     */
+    static <T extends Comparable<?> & Temporal> Interval<T> between(T lowerEndpoint, T upperEndpoint) {
         Range<T> range;
-        if (lowerInclusiveEndpoint != null && upperInclusiveEndpoint != null) {
-            range = Range.closed(lowerInclusiveEndpoint, upperInclusiveEndpoint);
-        } else if (lowerInclusiveEndpoint != null) {
-            range = Range.atLeast(lowerInclusiveEndpoint);
-        } else if (upperInclusiveEndpoint != null) {
-            range = Range.atMost(upperInclusiveEndpoint);
+        if (lowerEndpoint != null && upperEndpoint != null) {
+            range = Range.closed(lowerEndpoint, upperEndpoint);
+        } else if (lowerEndpoint != null) {
+            range = Range.atLeast(lowerEndpoint);
+        } else if (upperEndpoint != null) {
+            range = Range.atMost(upperEndpoint);
         } else {
             range = Range.all();
         }
 
         return new IntervalImpl<>(ImmutableRangeSet.of(range));
+    }
+
+    /**
+     * @param lowerEndpoint - required lower endpoint.
+     * @return [[lowerEndpoint..+∞)].
+     */
+    static <T extends Comparable<?> & Temporal> Interval<T> atLeast(T lowerEndpoint) {
+        return new IntervalImpl<>(ImmutableRangeSet.of(Range.atLeast(lowerEndpoint)));
+    }
+
+    /**
+     * @param upperEndpoint - required lower endpoint.
+     * @return [(-∞..upperEndpoint]].
+     */
+    static <T extends Comparable<?> & Temporal> Interval<T> atMost(T upperEndpoint) {
+        return new IntervalImpl<>(ImmutableRangeSet.of(Range.atLeast(upperEndpoint)));
+    }
+
+    /**
+     * @param lowerEndpoint - required lower endpoint.
+     * @param upperEndpoint - required upper endpoint.
+     * @return [[lowerEndpoint..upperEndpoint]]
+     */
+    static <T extends Comparable<?> & Temporal> Interval<T> closed(T lowerEndpoint, T upperEndpoint) {
+        return new IntervalImpl<>(ImmutableRangeSet.of(Range.closed(lowerEndpoint, upperEndpoint)));
     }
 
     /**

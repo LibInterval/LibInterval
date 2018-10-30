@@ -29,10 +29,6 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
 
     private final ImmutableRangeSet<T> rangeSet;
 
-    IntervalImpl(ImmutableRangeSet<T> rangeSet) {
-        this.rangeSet = rangeSet;
-    }
-
     @Override
     public Interval<T> difference(Interval<T> interval) {
         logger.debug("Finding difference of " + this + " and " + interval);
@@ -167,5 +163,9 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     @Override
     public String toString() {
         return rangeSet.toString();
+    }
+
+    IntervalImpl(ImmutableRangeSet<T> rangeSet) {
+        this.rangeSet = rangeSet;
     }
 }
