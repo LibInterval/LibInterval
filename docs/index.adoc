@@ -1,0 +1,20 @@
+= Siderian - Reference Documentation
+:icons: font
+:toc: left
+:sectnums:
+
+include::chapters/introduction.adoc[]
+
+include::chapters/factory-methods.adoc[]
+
+include::chapters/map.adoc[]
+
+include::chapters/iteration.adoc[]
+
+include::chapters/intersection.adoc[]
+
+include::chapters/union.adoc[]
+
+include::chapters/difference.adoc[]
+
+include::chapters/count-time-units.adoc[]

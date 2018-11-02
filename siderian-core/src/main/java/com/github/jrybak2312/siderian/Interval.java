@@ -79,7 +79,7 @@ public interface Interval<T extends Comparable<?> & Temporal> {
      * @return [(-∞..upperEndpoint]].
      */
     static <T extends Comparable<?> & Temporal> Interval<T> atMost(T upperEndpoint) {
-        return new IntervalImpl<>(ImmutableRangeSet.of(Range.atLeast(upperEndpoint)));
+        return new IntervalImpl<>(ImmutableRangeSet.of(Range.atMost(upperEndpoint)));
     }
 
     /**

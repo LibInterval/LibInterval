@@ -1,0 +1,37 @@
+== Factory methods
+
+=== Create basic interval
+[source,java]
+----
+LocalDate startDate = LocalDate.of(2020, 1, 10);
+LocalDate endDate = LocalDate.of(2035, 5, 20);
+Interval<LocalDate> interval = Interval.between(startDate, endDate);
+System.out.println(interval); // prints [[2020-01-10..2035-05-20]]
+----
+
+[TIP]
+====
+All state of the interval is stored in `com.google.common.collect.ImmutableRangeSet`. `toString()` method delegates
+`toString()` method of `ImmutableRangeSet`. So use to `toString()` method to log state of the interval.
+====
+
+=== Factory methods to create unbounded intervals
+[source,java]
+----
+Interval.all();                      // [(-∞..+∞)]
+Interval.between(null, null);        // [(-∞..+∞)]
+Interval.none();                     // []
+Interval.from(startDate);            // [[2020-01-10..+∞)]
+Interval.to(endDate);                // [(-∞..2035-05-10]]
+Interval.between(startDate, null);   // [[2020-01-10..+∞)]
+Interval.between(null, endDate);     // [(-∞..2035-05-10]]
+----
+
+=== Factory methods that requires not null values
+[source,java]
+----
+Interval.closed(startDate, null);    // throws NPE
+Interval.closed(startDate, endDate); // [[2020-01-10..2035-05-20]]
+Interval.atLeast(startDate);         // [[2020-01-10..+∞)]
+Interval.atMost(endDate);            // [(-∞..2035-05-10]]
+----
