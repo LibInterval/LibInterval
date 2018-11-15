@@ -57,7 +57,7 @@ public class TestIntervalImpl {
 
     @Test
     public void testAtMost() {
-        assertEquals("[[2020-01-01..+∞)]", Interval.atMost(baseDate).toString());
+        assertEquals("[(-∞..2020-01-01]]", Interval.atMost(baseDate).toString());
     }
 
     @Test
