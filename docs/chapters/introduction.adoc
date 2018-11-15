@@ -1,7 +1,7 @@
 == Introduction
 
 `com.github.jrybak2312.siderian.Interval` represents interval between two inclusive endpoints or in *some cases interval
-witch has gap(s)*. `Interval` support values with type which implements both Comparable and Temporal. So it supports many types from
+witch has gap(s)*. `Interval` supports values with type which implements both Comparable and Temporal. So it supports many types from
                    `java.time` package such as `java.time.LocalDate`, `java.time.YearMonth`, `java.time.LocalDateTime`...
 
 It uses Guava ranges under the hood and contains implementation of common features for work with time intervals
