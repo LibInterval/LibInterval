@@ -6,8 +6,8 @@ Interval<Year> interval = Interval.between(Year.of(2020), Year.of(2035));
 ```
 Here is table which contains method call to convert that interval and toString() method output from converted interval.
 e.g:
-```
-System.out.println(interval.toMonthsInterval());
+```java
+System.out.println(interval.toMonthsInterval()); // prints [[2020-01..2035-12]]
 ```
 
 .Convertion examples:
