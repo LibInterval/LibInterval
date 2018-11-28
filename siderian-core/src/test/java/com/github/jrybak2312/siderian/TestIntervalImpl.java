@@ -378,6 +378,26 @@ public class TestIntervalImpl {
     }
 
     @Test
+    public void testToMonthsStreamWithYearInterval() {
+        List<YearMonth> result = between(Year.of(2021), Year.of(2021)).months()
+                .collect(toList());
+
+        assertThat(result).containsExactly(
+                YearMonth.of(2021, 1),
+                YearMonth.of(2021, 2),
+                YearMonth.of(2021, 3),
+                YearMonth.of(2021, 4),
+                YearMonth.of(2021, 5),
+                YearMonth.of(2021, 6),
+                YearMonth.of(2021, 7),
+                YearMonth.of(2021, 8),
+                YearMonth.of(2021, 9),
+                YearMonth.of(2021, 10),
+                YearMonth.of(2021, 11),
+                YearMonth.of(2021, 12));
+    }
+
+    @Test
     public void testEmptyNotNoneInterval() {
         Interval<LocalDate> noneInterval = Interval.none();
         assertFalse(noneInterval.notNoneInterval().isPresent());

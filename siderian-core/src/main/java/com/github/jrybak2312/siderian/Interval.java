@@ -183,11 +183,11 @@ public interface Interval<T extends Comparable<?> & Temporal> {
                                                          Function<T, R> upperEndpointMapper);
 
     default Stream<YearMonth> months() {
-        return iterate(MONTHS, YearMonth::from);
+        return iterate(MONTHS, t -> convertLowerEndpoint(t, YearMonth.class), t -> convertUpperEndpoint(t, YearMonth.class));
     }
 
     default Stream<LocalDate> days() {
-        return iterate(DAYS, LocalDate::from);
+        return iterate(DAYS, t -> convertLowerEndpoint(t, LocalDate.class), t -> convertUpperEndpoint(t, LocalDate.class));
     }
 
     default <R extends Comparable<?> & Temporal> Stream<R> iterate(TemporalUnit temporalUnit,
