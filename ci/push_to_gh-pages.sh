@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ !"$TRAVIS_BRANCH" = "master" ]; then exit 0; fi
+if [ "$TRAVIS_BRANCH" != "master" ]; then exit 0; fi
 
 targetRepo=github.com/jrybak2312/siderian.git
 cd docs
