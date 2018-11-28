@@ -1,1 +1,65 @@
 == Map
+
+Let's say there is an interval:
+```java
+Interval<Year> interval = Interval.between(Year.of(2020), Year.of(2035));
+```
+Here is table which contains method call to convert that interval and toString() method output from converted interval.
+e.g:
+```
+System.out.println(interval.toMonthsInterval());
+```
+
+.Convertion examples:
+|===
+|method call|toString() output
+
+|toMonthsInterval()
+|[[2020-01..2035-12]]
+
+|toDaysInterval()
+|[[2020-01-01..2035-12-31]]
+
+|toTimeInterval()
+|[[2020-01-01T00:00..2035-12-31T23:59:59.999999999]]
+
+|map(year \-> year.minusYears(5))
+|[[2015..2030]]
+
+|map(year \-> year.atDay(5), year \-> year.atDay(360))
+|[[2020-01-05..2035-12-26]]
+
+|===
+
+
+.Prefered way to convert interval from one `java.time` type to another.
+|===
+|from/to|Year|YearMonth|LocalDate|LocalDateTime
+
+|Year
+|x
+|toMonthsInterval()
+|toDaysInterval()
+|toTimeInterval()
+
+|YearMonth
+|map(Year::from)
+|x
+|toDaysInterval()
+|toTimeInterval()
+
+|LocalDate
+|map(Year::from)
+|map(YearMonth::from)
+|x
+|toTimeInterval()
+
+|LocalDateTime
+|map(Year::from)
+|map(YearMonth::from)
+|map(LocalDate::from)
+|x
+
+|===
+
+
