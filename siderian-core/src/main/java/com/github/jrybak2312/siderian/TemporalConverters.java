@@ -34,12 +34,11 @@ class TemporalConverters {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Comparable<?> & Temporal, R> R convertUpperEndpoint(T upperEnpoint, Class<R> type) {
+    public static <T extends Comparable<?> & Temporal, R> R convertUpperEndpoint(T upperEndpoint, Class<R> type) {
         return (R) Optional.ofNullable(converters.get(type))
-                .map(converter -> converter.convertToUpperEndpoint(upperEnpoint))
+                .map(converter -> converter.convertToUpperEndpoint(upperEndpoint))
                 .orElseThrow(() -> new IllegalArgumentException("Type " + type + " is not supported."));
     }
-
 
     private interface TemporalConverter<V> {
         V convertToLowerEndpoint(Temporal temporal);
