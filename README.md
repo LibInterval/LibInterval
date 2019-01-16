@@ -6,4 +6,3 @@ There are no any releases yet but you can use JitPack to get **libinterval-core*
 [![](https://jitpack.io/v/jrybak2312/LibInterval.svg)](https://jitpack.io/#jrybak2312/LibInterval)
 
 ### Reference Documentation: https://jrybak2312.github.io/LibInterval
-[Build Status](https://travis-ci.org/jrybak2312/LibInterval.svg?branch=master)
