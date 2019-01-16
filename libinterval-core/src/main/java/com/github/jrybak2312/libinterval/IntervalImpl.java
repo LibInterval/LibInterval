@@ -1,4 +1,4 @@
-package com.github.jrybak2312.siderian;
+package com.github.jrybak2312.libinterval;
 
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableRangeSet;
@@ -15,8 +15,8 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import static com.github.jrybak2312.siderian.IntervalUtils.newInvalidLowerBoundException;
-import static com.github.jrybak2312.siderian.IntervalUtils.newInvalidUpperBoundException;
+import static com.github.jrybak2312.libinterval.IntervalUtils.newInvalidLowerBoundException;
+import static com.github.jrybak2312.libinterval.IntervalUtils.newInvalidUpperBoundException;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
 

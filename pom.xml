@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.jrybak2312</groupId>
-    <artifactId>siderian</artifactId>
+    <artifactId>libinterval</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>siderian-core</module>
+        <module>libinterval-core</module>
     </modules>
 
     <properties>

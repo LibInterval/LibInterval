@@ -1,6 +1,6 @@
 == Introduction
 
-`com.github.jrybak2312.siderian.Interval` represents interval between two inclusive endpoints or in *some cases interval
+`com.github.jrybak2312.libinterval.Interval` represents interval between two inclusive endpoints or in *some cases interval
 witch has gap(s)*. `Interval` supports values with type which implements both Comparable and Temporal. So it supports many types from
                    `java.time` package such as `java.time.LocalDate`, `java.time.YearMonth`, `java.time.LocalDateTime`...
 

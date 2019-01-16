@@ -1,4 +1,4 @@
-= Siderian - Reference Documentation
+= LibInterval - Reference Documentation
 :icons: font
 :toc: left
 :sectnums:

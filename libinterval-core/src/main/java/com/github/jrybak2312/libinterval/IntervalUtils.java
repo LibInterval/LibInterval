@@ -1,4 +1,4 @@
-package com.github.jrybak2312.siderian;
+package com.github.jrybak2312.libinterval;
 
 import com.google.common.collect.ImmutableRangeSet;
 

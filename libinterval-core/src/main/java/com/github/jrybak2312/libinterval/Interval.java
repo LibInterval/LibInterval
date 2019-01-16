@@ -1,4 +1,4 @@
-package com.github.jrybak2312.siderian;
+package com.github.jrybak2312.libinterval;
 
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
@@ -15,8 +15,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.github.jrybak2312.siderian.TemporalConverters.convertLowerEndpoint;
-import static com.github.jrybak2312.siderian.TemporalConverters.convertUpperEndpoint;
+import static com.github.jrybak2312.libinterval.TemporalConverters.convertLowerEndpoint;
+import static com.github.jrybak2312.libinterval.TemporalConverters.convertUpperEndpoint;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MONTHS;
 
