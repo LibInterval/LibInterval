@@ -1,34 +1,34 @@
 sudo: required
 
 services:
-- docker
+  - docker
 
 language: java
 
 jdk:
-- oraclejdk8
+  - oraclejdk8
 
 before_install:
-- mkdir -p output
-- docker pull asciidoctor/docker-asciidoctor
+  - mkdir -p output
+  - docker pull asciidoctor/docker-asciidoctor
 
 script:
-- docker run -v $TRAVIS_BUILD_DIR:/documents/ --name asciidoc-to-html asciidoctor/docker-asciidoctor asciidoctor -b html5 docs/index.adoc --out-file docs/index.html
+  - docker run -v $TRAVIS_BUILD_DIR:/documents/ --name asciidoc-to-html asciidoctor/docker-asciidoctor asciidoctor -b html5 docs/index.adoc --out-file docs/index.html
 
 after_error:
-- docker logs asciidoc-to-html
+  - docker logs asciidoc-to-html
 
 after_failure:
-- docker logs asciidoc-to-html
+  - docker logs asciidoc-to-html
 
 after_success:
-- bash <(curl -s https://codecov.io/bash)
-- bash ci/push_to_gh-pages.sh
+  - bash <(curl -s https://codecov.io/bash)
+  - bash ci/push_to_gh-pages.sh
 
 branches:
   except:
-  - gh-pages
+    - gh-pages
 
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2
