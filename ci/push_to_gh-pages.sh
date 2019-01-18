@@ -10,4 +10,4 @@ git config user.email "Travis CI"
 git add *.html
 git commit -m "Deploy to GitHub Pages"
 git push --force --quiet "https://${GH_TOKEN}@${targetRepo}" master:gh-pages > /dev/null 2>&1
-cd ..
+cd ../..
