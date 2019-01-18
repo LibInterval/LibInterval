@@ -3,7 +3,7 @@
 if [ "$TRAVIS_BRANCH" != "master" ]; then exit 0; fi
 
 targetRepo=github.com/jrybak2312/LibInterval.git
-cd docs
+cd target/generated-docs
 git init
 git config user.name "travis@travis-ci.org"
 git config user.email "Travis CI"
