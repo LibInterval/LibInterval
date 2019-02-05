@@ -1,4 +1,4 @@
-package com.github.jrybak2312.libinterval;
+package com.github.libinterval;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +12,8 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.util.List;
 
-import static com.github.jrybak2312.libinterval.Interval.between;
-import static com.github.jrybak2312.libinterval.Interval.unionOf;
+import static com.github.libinterval.Interval.between;
+import static com.github.libinterval.Interval.unionOf;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;

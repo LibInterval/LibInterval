@@ -1,4 +1,4 @@
-package com.github.jrybak2312.libinterval;
+package com.github.libinterval;
 
 import com.google.common.collect.DiscreteDomain;
 

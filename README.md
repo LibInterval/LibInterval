@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.com/jrybak2312/LibInterval.svg?branch=master)](https://travis-ci.org/jrybak2312/LibInterval)
-[![codecov](https://codecov.io/gh/jrybak2312/LibInterval/branch/master/graph/badge.svg)](https://codecov.io/gh/jrybak2312/LibInterval)
+[![Build Status](https://travis-ci.com/LibInterval/LibInterval.svg?branch=master)](https://travis-ci.org/LibInterval/LibInterval)
+[![codecov](https://codecov.io/gh/LibInterval/LibInterval/branch/master/graph/badge.svg)](https://codecov.io/gh/LibInterval/LibInterval)
 
 There are no any releases yet but you can use JitPack to get **libinterval-core** artifact:
 
-[![](https://jitpack.io/v/jrybak2312/LibInterval.svg)](https://jitpack.io/#jrybak2312/LibInterval)
+[![](https://jitpack.io/v/LibInterval/LibInterval.svg)](https://jitpack.io/#LibInterval/LibInterval)
 
-### Reference Documentation: https://jrybak2312.github.io/LibInterval
+### Reference Documentation: https://libinterval.github.io/LibInterval
