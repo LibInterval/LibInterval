@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toSet;
 class IntervalUtils {
 
     static <T extends Comparable<?> & Temporal> Interval<T> intersection(Stream<Interval<T>> intervals) {
-        ImmutableRangeSet<T> rangeSet = intervals.map(Interval::rangeSet)
+        ImmutableRangeSet<T> rangeSet = intervals.map(Interval::getRangeSet)
                 .map(ImmutableRangeSet::copyOf)
                 .reduce(ImmutableRangeSet::intersection)
                 .orElseThrow(IllegalArgumentException::new);
@@ -23,7 +23,7 @@ class IntervalUtils {
     }
 
     static <T extends Comparable<?> & Temporal> Interval<T> union(Stream<Interval<T>> intervals) {
-        ImmutableRangeSet<T> rangeSet = intervals.flatMap(i -> i.rangeSet().asRanges().stream())
+        ImmutableRangeSet<T> rangeSet = intervals.flatMap(i -> i.getRangeSet().asRanges().stream())
                 .collect(collectingAndThen(toSet(), ImmutableRangeSet::unionOf));
 
         return new IntervalImpl<>(rangeSet);

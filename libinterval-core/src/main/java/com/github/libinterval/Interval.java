@@ -127,12 +127,6 @@ public interface Interval<T extends Comparable<?> & Temporal> {
         return IntervalUtils.union(Streams.stream(intervals).map(getIntervalFunction));
     }
 
-    static Interval<LocalDate> daysIntervalFromMonth(YearMonth month) {
-        LocalDate startDate = month.atDay(1);
-        LocalDate endDate = month.atEndOfMonth();
-        return Interval.between(startDate, endDate);
-    }
-
     static <T extends Comparable<?> & Temporal> Interval<T> all() {
         ImmutableRangeSet<T> all = ImmutableRangeSet.of(Range.all());
         return new IntervalImpl<>(all);
@@ -151,9 +145,9 @@ public interface Interval<T extends Comparable<?> & Temporal> {
 
     Interval<T> difference(Interval<T> interval, TemporalUnit temporalUnit);
 
-    Optional<T> lowerEndpoint();
+    Optional<T> findLowerEndpoint();
 
-    Optional<T> upperEndpoint();
+    Optional<T> findUpperEndpoint();
 
     boolean contains(T t);
 
@@ -161,7 +155,7 @@ public interface Interval<T extends Comparable<?> & Temporal> {
 
     boolean hasUpperBound();
 
-    Set<Interval<T>> subIntervals();
+    Set<Interval<T>> getSubIntervals();
 
     default Interval<YearMonth> toMonthsInterval() {
         return map(t -> convertLowerEndpoint(t, YearMonth.class), t -> convertUpperEndpoint(t, YearMonth.class));
@@ -207,7 +201,7 @@ public interface Interval<T extends Comparable<?> & Temporal> {
 
     boolean isPresent();
 
-    Optional<Interval<T>> notNoneInterval();
+    Optional<Interval<T>> getNotNoneInterval();
 
-    ImmutableRangeSet<T> rangeSet();
+    ImmutableRangeSet<T> getRangeSet();
 }

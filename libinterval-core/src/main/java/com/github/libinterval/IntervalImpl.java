@@ -47,7 +47,7 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     }
 
     private Interval<T> findDifference(Interval<T> interval, RangeConverter<T> rangeConverter) {
-        ImmutableRangeSet<T> difference = this.rangeSet.difference(interval.rangeSet());
+        ImmutableRangeSet<T> difference = this.rangeSet.difference(interval.getRangeSet());
         return new IntervalImpl<>(convertToClosed(difference, rangeConverter));
     }
 
@@ -59,12 +59,12 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     }
 
     @Override
-    public Optional<T> lowerEndpoint() {
+    public Optional<T> findLowerEndpoint() {
         return getRange().hasLowerBound() ? Optional.of(getRange().lowerEndpoint()) : Optional.empty();
     }
 
     @Override
-    public Optional<T> upperEndpoint() {
+    public Optional<T> findUpperEndpoint() {
         return getRange().hasUpperBound() ? Optional.of(getRange().upperEndpoint()) : Optional.empty();
     }
 
@@ -84,7 +84,7 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     }
 
     @Override
-    public Set<Interval<T>> subIntervals() {
+    public Set<Interval<T>> getSubIntervals() {
         return rangeSet.asRanges().stream()
                 .map(ImmutableRangeSet::of)
                 .map((Function<ImmutableRangeSet<T>, IntervalImpl<T>>) IntervalImpl::new)
@@ -95,12 +95,12 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     public <R extends Comparable<?> & Temporal> Stream<R> iterate(TemporalUnit temporalUnit,
                                                                   Function<T, R> lowerEndpointMapper,
                                                                   Function<T, R> upperEndpointMapper) {
-        return subIntervals().stream()
+        return getSubIntervals().stream()
                 .flatMap(subInterval -> {
                     Interval<R> converted = subInterval.map(lowerEndpointMapper, upperEndpointMapper);
-                    R lower = converted.lowerEndpoint()
+                    R lower = converted.findLowerEndpoint()
                             .orElseThrow(() -> newInvalidLowerBoundException(converted));
-                    R upper = converted.upperEndpoint()
+                    R upper = converted.findUpperEndpoint()
                             .orElseThrow(() -> newInvalidUpperBoundException(converted));
 
                     @SuppressWarnings("unchecked")
@@ -115,13 +115,13 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     @Override
     public <R extends Comparable<?> & Temporal> Interval<R> map(Function<T, R> lowerEndpointMapper,
                                                                 Function<T, R> upperEndpointMapper) {
-        ImmutableRangeSet<R> rangeSet = subIntervals().stream()
+        ImmutableRangeSet<R> rangeSet = getSubIntervals().stream()
                 .map(i -> {
-                    R start = i.lowerEndpoint().map(lowerEndpointMapper).orElse(null);
-                    R end = i.upperEndpoint().map(upperEndpointMapper).orElse(null);
+                    R start = i.findLowerEndpoint().map(lowerEndpointMapper).orElse(null);
+                    R end = i.findUpperEndpoint().map(upperEndpointMapper).orElse(null);
                     return Interval.between(start, end);
                 })
-                .map(Interval::rangeSet)
+                .map(Interval::getRangeSet)
                 .map(RangeSet::asRanges)
                 .flatMap(Set::stream)
                 .collect(collectingAndThen(toSet(), ImmutableRangeSet::unionOf));
@@ -142,12 +142,12 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     }
 
     @Override
-    public Optional<Interval<T>> notNoneInterval() {
+    public Optional<Interval<T>> getNotNoneInterval() {
         return isPresent() ? Optional.of(this) : Optional.empty();
     }
 
     @Override
-    public ImmutableRangeSet<T> rangeSet() {
+    public ImmutableRangeSet<T> getRangeSet() {
         return rangeSet;
     }
 

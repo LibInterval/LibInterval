@@ -400,13 +400,13 @@ public class TestIntervalImpl {
     @Test
     public void testEmptyNotNoneInterval() {
         Interval<LocalDate> noneInterval = Interval.none();
-        assertFalse(noneInterval.notNoneInterval().isPresent());
+        assertFalse(noneInterval.getNotNoneInterval().isPresent());
     }
 
     @Test
     public void testNotEmptyNotNoneInterval() {
         Interval<LocalDate> i = between(baseDate, baseDate.plusDays(10));
-        Interval<LocalDate> result = i.notNoneInterval().get();
+        Interval<LocalDate> result = i.getNotNoneInterval().get();
         assertEquals("[[2020-01-01..2020-01-11]]", result.toString());
     }
 
