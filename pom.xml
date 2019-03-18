@@ -7,7 +7,7 @@
     <groupId>com.github.libinterval</groupId>
     <artifactId>libinterval-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-RC1</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <name>LibInterval</name>
     <description>Java time interval library.</description>
@@ -153,6 +153,11 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <gpgArguments>
+                                <gpgArgument>--no-tty</gpgArgument>
+                            </gpgArguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
