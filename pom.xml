@@ -7,7 +7,7 @@
     <groupId>com.github.libinterval</groupId>
     <artifactId>libinterval-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-RC2</version>
 
     <name>LibInterval</name>
     <description>Java time interval library.</description>
