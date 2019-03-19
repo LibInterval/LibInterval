@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -84,31 +86,46 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
     }
 
     @Override
-    public Set<Interval<T>> getSubIntervals() {
-        return rangeSet.asRanges().stream()
-                .map(ImmutableRangeSet::of)
-                .map((Function<ImmutableRangeSet<T>, IntervalImpl<T>>) IntervalImpl::new)
-                .collect(toSet());
-    }
-
-    @Override
+    @SuppressWarnings("unchecked")
     public <R extends Comparable<?> & Temporal> Stream<R> iterate(TemporalUnit temporalUnit,
                                                                   Function<T, R> lowerEndpointMapper,
                                                                   Function<T, R> upperEndpointMapper) {
-        return getSubIntervals().stream()
+        return subIntervalsStream()
                 .flatMap(subInterval -> {
-                    Interval<R> converted = subInterval.map(lowerEndpointMapper, upperEndpointMapper);
+                    Interval<R> converted;
+
+                    if (lowerEndpointMapper == null && upperEndpointMapper == null) {
+                        converted = (Interval<R>) this;
+                    } else {
+                        Objects.requireNonNull(lowerEndpointMapper, "lowerEndpointMapper is required");
+                        Objects.requireNonNull(lowerEndpointMapper, "upperEndpointMapper is required");
+                        converted = subInterval.map(lowerEndpointMapper, upperEndpointMapper);
+                    }
+
                     R lower = converted.findLowerEndpoint()
                             .orElseThrow(() -> newInvalidLowerBoundException(converted));
                     R upper = converted.findUpperEndpoint()
                             .orElseThrow(() -> newInvalidUpperBoundException(converted));
 
-                    @SuppressWarnings("unchecked")
                     UnaryOperator<R> increaseFunction = date -> (R) date.plus(1, temporalUnit);
                     return Stream.iterate(lower, increaseFunction)
                             .limit(temporalUnit.between(lower, upper) + 1);
                 })
                 .distinct()
+                .sorted();
+    }
+
+    @Override
+    public <R> Stream<R> iterate(BiFunction<T, T, Stream<R>> streamGenerator) {
+        return subIntervalsStream()
+                .flatMap(subInterval -> {
+                    T lower = subInterval.findLowerEndpoint()
+                            .orElseThrow(() -> newInvalidLowerBoundException(this));
+                    T upper = subInterval.findUpperEndpoint()
+                            .orElseThrow(() -> newInvalidUpperBoundException(this));
+
+                    return streamGenerator.apply(lower, upper);
+                })
                 .sorted();
     }
 
@@ -127,6 +144,18 @@ class IntervalImpl<T extends Comparable<?> & Temporal> implements Interval<T> {
                 .collect(collectingAndThen(toSet(), ImmutableRangeSet::unionOf));
 
         return new IntervalImpl<>(rangeSet);
+    }
+
+    @Override
+    public Set<Interval<T>> getSubIntervals() {
+        return subIntervalsStream()
+                .collect(toSet());
+    }
+
+    private Stream<IntervalImpl<T>> subIntervalsStream() {
+        return rangeSet.asRanges().stream()
+                .map(ImmutableRangeSet::of)
+                .map(IntervalImpl::new);
     }
 
     @Override

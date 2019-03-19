@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.threeten.extra.YearQuarter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.util.List;
 import static com.github.libinterval.Interval.between;
 import static com.github.libinterval.Interval.unionOf;
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.YEARS;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -395,6 +397,34 @@ public class TestIntervalImpl {
                 YearMonth.of(2021, 10),
                 YearMonth.of(2021, 11),
                 YearMonth.of(2021, 12));
+    }
+
+    @Test
+    public void testIterationByTemporalUnit() {
+        YearMonth m1 = YearMonth.of(2018, 3);
+        YearMonth m2 = YearMonth.of(2020, 7);
+        List<YearMonth> result = between(m1, m2).iterate(YEARS)
+                .collect(toList());
+
+        assertThat(result).containsExactly(
+                YearMonth.of(2018, 3),
+                YearMonth.of(2019, 3),
+                YearMonth.of(2020, 3));
+    }
+
+    @Test
+    public void testCustomIterationMethod() {
+        Interval<YearQuarter> i1 = between(YearQuarter.of(2017, 3), YearQuarter.of(2018, 1));
+        Interval<YearQuarter> i2 = between(YearQuarter.of(2018, 4), YearQuarter.of(2019, 1));
+        List<YearQuarter> result = unionOf(i1, i2).iterate((q1, q2) -> q1.quartersUntil(q2.plusQuarters(1)))
+                .collect(toList());
+
+        assertThat(result).containsExactly(
+                YearQuarter.of(2017, 3),
+                YearQuarter.of(2017, 4),
+                YearQuarter.of(2018, 1),
+                YearQuarter.of(2018, 4),
+                YearQuarter.of(2019, 1));
     }
 
     @Test

@@ -12,6 +12,7 @@ import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -40,7 +41,7 @@ public interface Interval<T extends Comparable<?> & Temporal> {
 
     /**
      * @param upperEndpoint - nullable upper endpoint. If null than +∞.
-     * @return [(-∞..upperEndpoint]].
+     * @return [(- ∞ ..upperEndpoint]].
      */
     static <T extends Comparable<?> & Temporal> Interval<T> to(T upperEndpoint) {
         return between(null, upperEndpoint);
@@ -76,7 +77,7 @@ public interface Interval<T extends Comparable<?> & Temporal> {
 
     /**
      * @param upperEndpoint - required lower endpoint.
-     * @return [(-∞..upperEndpoint]].
+     * @return [(- ∞ ..upperEndpoint]].
      */
     static <T extends Comparable<?> & Temporal> Interval<T> atMost(T upperEndpoint) {
         return new IntervalImpl<>(ImmutableRangeSet.of(Range.atMost(upperEndpoint)));
@@ -184,6 +185,10 @@ public interface Interval<T extends Comparable<?> & Temporal> {
         return iterate(DAYS, t -> convertLowerEndpoint(t, LocalDate.class), t -> convertUpperEndpoint(t, LocalDate.class));
     }
 
+    default Stream<T> iterate(TemporalUnit temporalUnit) {
+        return iterate(temporalUnit, null);
+    }
+
     default <R extends Comparable<?> & Temporal> Stream<R> iterate(TemporalUnit temporalUnit,
                                                                    Function<T, R> mapper) {
         return iterate(temporalUnit, mapper, mapper);
@@ -192,6 +197,8 @@ public interface Interval<T extends Comparable<?> & Temporal> {
     <R extends Comparable<?> & Temporal> Stream<R> iterate(TemporalUnit temporalUnit,
                                                            Function<T, R> lowerEndpointMapper,
                                                            Function<T, R> upperEndpointMapper);
+
+    <R> Stream<R> iterate(BiFunction<T, T, Stream<R>> streamGenerator);
 
     default long countDays() {
         return count(DAYS);
